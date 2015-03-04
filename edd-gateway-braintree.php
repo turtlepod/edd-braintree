@@ -111,8 +111,6 @@ function edd_braintree_process_payment( $purchase_data ) {
 				update_user_meta( $purchase_data['user_info']['id'], 'edd_braintree_cc_tokens', $tokens );
 			}
 
-			echo '<pre>'; print_r( $result->transaction ); echo '</pre>'; exit;
-
 			edd_empty_cart();
 			edd_update_payment_status( $payment, 'complete' );
 			if( function_exists( 'edd_set_payment_transaction_id' ) ) {
