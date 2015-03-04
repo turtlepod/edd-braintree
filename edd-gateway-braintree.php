@@ -55,7 +55,7 @@ function edd_braintree_process_payment( $purchase_data ) {
 		$transaction = array(
 			'orderId'		=> $payment,
 			'amount' 		=> $purchase_data['price'],
-			'merchantAccountId'	=> trim( $edd_options['braintree_merchantAccountId'] ),
+			'merchantAccountId'	=> trim( edd_get_option( 'braintree_merchantAccountId', '' ),
 			'creditCard'	=> array(
 				'cardholderName'	=> $cc['card_name'],
 				'number'			=> $cc['card_number'],
@@ -79,11 +79,13 @@ function edd_braintree_process_payment( $purchase_data ) {
 			'options'	=> array()
 		);
 
-		if( isset( $edd_options['braintree_submitForSettlement'] ) && $edd_options['braintree_submitForSettlement'] == 1 )
+		if( edd_get_option( 'braintree_submitForSettlement' ) ) {
 			$transaction['options']['submitForSettlement'] = true;
+		}
 
-		if( isset( $edd_options['braintree_storeInVaultOnSuccess'] ) && $edd_options['braintree_storeInVaultOnSuccess'] == 1 )
+		if( edd_get_option( 'braintree_storeInVaultOnSuccess' ) ) {
 			$transaction['options']['storeInVaultOnSuccess'] = true;
+		}
 
 		if( edd_is_test_mode() ) {
 			Braintree_Configuration::environment('sandbox');
@@ -91,16 +93,16 @@ function edd_braintree_process_payment( $purchase_data ) {
 			Braintree_Configuration::environment('production');
 		}
 			
-		Braintree_Configuration::merchantId( trim( $edd_options['braintree_merchantId'] ) );
-		Braintree_Configuration::publicKey( trim( $edd_options['braintree_publicKey'] ) );
-		Braintree_Configuration::privateKey( trim( $edd_options['braintree_privateKey'] ) );
+		Braintree_Configuration::merchantId( trim( edd_get_option( 'braintree_merchantId' ) ) );
+		Braintree_Configuration::publicKey( trim( edd_get_option( 'braintree_publicKey' ) ) );
+		Braintree_Configuration::privateKey( trim( edd_get_option( 'braintree_privateKey' ) ) );
 
 		$result = Braintree_Transaction::sale( $transaction );
 
 		if( $result->success ) {
 			
 			// WINNING
-			if( isset( $edd_options['braintree_storeInVaultOnSuccess'] ) && $edd_options['braintree_storeInVaultOnSuccess'] == 1 && isset( $purchase_data['user_info']['id'] ) && $purchase_data['user_info']['id'] > 0 ) {
+			if( edd_get_option( 'braintree_storeInVaultOnSuccess' ) && isset( $purchase_data['user_info']['id'] ) && $purchase_data['user_info']['id'] > 0 ) {
 				$tokens = get_user_meta( $purchase_data['user_info']['id'], 'edd_braintree_cc_tokens', true );
 				if( empty( $tokens ) ) {
 					$tokens = array();
