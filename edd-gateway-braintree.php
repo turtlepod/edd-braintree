@@ -23,7 +23,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-if( class_exists( 'EDD_License' ) ) {
+if( class_exists( 'EDD_License' ) && is_admin() ) {
 	$edd_bt_license = new EDD_License( __FILE__, 'Braintree', '1.0.2', 'Pippin Williamson', 'braintree_license_key' );
 }
 
