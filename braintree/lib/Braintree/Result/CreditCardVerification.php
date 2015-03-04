@@ -2,21 +2,13 @@
 /**
  * Braintree Credit Card Verification Result
  *
- * @package    Braintree
- * @subpackage Result
- * @copyright  2010 Braintree Payment Solutions
- */
-
-/**
- * Braintree Credit Card Verification Result
- *
  * This object is returned as part of an Error Result; it provides
  * access to the credit card verification data from the gateway
  *
  *
  * @package    Braintree
  * @subpackage Result
- * @copyright  2010 Braintree Payment Solutions
+ * @copyright  2014 Braintree, a division of PayPal, Inc.
  *
  * @property-read string $avsErrorResponseCode
  * @property-read string $avsPostalCodeResponseCode
@@ -48,6 +40,7 @@ class Braintree_Result_CreditCardVerification
     {
         $this->_initializeFromArray($attributes);
     }
+
     /**
      * initializes instance properties from the keys/values of an array
      * @ignore
@@ -57,13 +50,18 @@ class Braintree_Result_CreditCardVerification
      */
     private function _initializeFromArray($attributes)
     {
+        if(isset($attributes['riskData']))
+        {
+            $attributes['riskData'] = Braintree_RiskData::factory($attributes['riskData']);
+        }
+
         $this->_attributes = $attributes;
         foreach($attributes AS $name => $value) {
             $varName = "_$name";
             $this->$varName = $value;
-            // $this->$varName = Braintree_Util::delimiterToCamelCase($value, '_');
         }
     }
+
     /**
      *
      * @ignore

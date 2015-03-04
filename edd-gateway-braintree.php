@@ -31,7 +31,7 @@ function edd_braintree_process_payment( $purchase_data ) {
 
 	global $edd_options;
 	
-	require_once 'braintree/lib/Braintree.php';
+	require_once plugin_dir_path( __FILE__ ) . 'braintree/lib/Braintree.php';
 
 	// check the posted cc deails
 	$cc = edd_braintree_check_cc_details( $purchase_data );
@@ -111,9 +111,13 @@ function edd_braintree_process_payment( $purchase_data ) {
 				update_user_meta( $purchase_data['user_info']['id'], 'edd_braintree_cc_tokens', $tokens );
 			}
 
+			echo '<pre>'; print_r( $result->transaction ); echo '</pre>'; exit;
+
 			edd_empty_cart();
 			edd_update_payment_status( $payment, 'complete' );
-
+			if( function_exists( 'edd_set_payment_transaction_id' ) ) {
+				edd_set_payment_transaction_id( $payment, $result->transaction->_attributes['id'] );
+			}
 			edd_send_to_success_page();
 		
 		} else { // LOSING
@@ -257,3 +261,31 @@ function edd_braintree_register_gateway( $gateways ) {
 	return $gateways;
 }
 add_filter( 'edd_payment_gateways', 'edd_braintree_register_gateway' );
+
+/**
+ * Given a transaction ID, generate a link to the Braintree transaction ID details
+ *
+ * @since  1.1
+ * @param  string $transaction_id The Transaction ID
+ * @param  int    $payment_id     The payment ID for this transaction
+ * @return string                 A link to the PayPal transaction details
+ */
+function edd_braintree_link_transaction_id( $transaction_id, $payment_id ) {
+
+	if( $transaction_id == $payment_id ) {
+		return $transaction_id;
+	}
+
+	$base = 'https://';
+
+	if( 'test' == get_post_meta( $payment_id, '_edd_payment_mode', true ) ) {
+		$base .= 'sandbox.';
+	}
+
+	$base .= 'braintreegateway.com/merchants/' . edd_get_option( 'braintree_merchantId' ) . '/transactions/';
+	$transaction_url = '<a href="' . esc_url( $base . $transaction_id ) . '" target="_blank">' . $transaction_id . '</a>';
+
+	return apply_filters( 'edd_braintree_link_payment_details_transaction_id', $transaction_url );
+
+}
+add_filter( 'edd_payment_details_transaction_id-braintree', 'edd_braintree_link_transaction_id', 10, 2 );

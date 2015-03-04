@@ -34,6 +34,9 @@ class Braintree_TransactionSearch
 	static function shippingPostalCode()         { return new Braintree_TextNode('shipping_postal_code'); }
 	static function shippingRegion()             { return new Braintree_TextNode('shipping_region'); }
 	static function shippingStreetAddress()      { return new Braintree_TextNode('shipping_street_address'); }
+	static function paypalPaymentId()            { return new Braintree_TextNode('paypal_payment_id'); }
+	static function paypalAuthorizationId()      { return new Braintree_TextNode('paypal_authorization_id'); }
+	static function paypalPayerEmail()           { return new Braintree_TextNode('paypal_payer_email'); }
 
 	static function creditCardExpirationDate()   { return new Braintree_EqualityNode('credit_card_expiration_date'); }
 
@@ -51,6 +54,8 @@ class Braintree_TransactionSearch
 	static function settledAt()                  { return new Braintree_RangeNode("settledAt"); }
 	static function submittedForSettlementAt()   { return new Braintree_RangeNode("submittedForSettlementAt"); }
 	static function voidedAt()                   { return new Braintree_RangeNode("voidedAt"); }
+	static function disbursementDate()           { return new Braintree_RangeNode("disbursementDate"); }
+	static function disputeDate()                { return new Braintree_RangeNode("disputeDate"); }
 
     static function merchantAccountId()          { return new Braintree_MultipleValueNode("merchant_account_id"); }
 
@@ -110,7 +115,9 @@ class Braintree_TransactionSearch
             Braintree_Transaction::SETTLED,
             Braintree_Transaction::SETTLING,
             Braintree_Transaction::SUBMITTED_FOR_SETTLEMENT,
-            Braintree_Transaction::VOIDED
+            Braintree_Transaction::VOIDED,
+            Braintree_Transaction::SETTLEMENT_DECLINED,
+            Braintree_Transaction::SETTLEMENT_PENDING
         ));
     }
 

@@ -1,13 +1,6 @@
 <?php
 /**
  * Braintree ResourceCollection
- *
- * @package    Braintree
- * @subpackage Utility
- * @copyright  2010 Braintree Payment Solutions
- */
-
-/**
  * ResourceCollection is a container object for result data
  *
  * stores and retrieves search results and aggregate data
@@ -23,7 +16,7 @@
  *
  * @package    Braintree
  * @subpackage Utility
- * @copyright  2010 Braintree Payment Solutions
+ * @copyright  2014 Braintree, a division of PayPal, Inc.
  */
 class Braintree_ResourceCollection implements Iterator
 {
@@ -82,7 +75,7 @@ class Braintree_ResourceCollection implements Iterator
     }
 
     /**
-     * rewinds thtestIterateOverResultse collection to the first item when iterating with foreach
+     * rewinds the testIterateOverResults collection to the first item when iterating with foreach
      */
     public function rewind()
     {
@@ -132,8 +125,8 @@ class Braintree_ResourceCollection implements Iterator
      */
     private function _getPage($ids)
     {
-        $className = $this->_pager['className'];
-        $classMethod = $this->_pager['classMethod'];
+        $object = $this->_pager['object'];
+        $method = $this->_pager['method'];
         $methodArgs = array();
         foreach ($this->_pager['methodArgs'] as $arg) {
             array_push($methodArgs, $arg);
@@ -141,7 +134,7 @@ class Braintree_ResourceCollection implements Iterator
         array_push($methodArgs, $ids);
 
         return call_user_func_array(
-            array($className, $classMethod),
+            array($object, $method),
             $methodArgs
         );
     }

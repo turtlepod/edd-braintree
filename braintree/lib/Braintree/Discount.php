@@ -1,15 +1,18 @@
 <?php
 class Braintree_Discount extends Braintree_Modification
 {
+    public static function factory($attributes)
+    {
+        $instance = new self();
+        $instance->_initialize($attributes);
+        return $instance;
+    }
+
+
+    // static methods redirecting to gateway
+
     public static function all()
     {
-        $response = Braintree_Http::get('/discounts');
-
-        $discounts = array("discount" => $response['discounts']);
-
-        return Braintree_Util::extractAttributeAsArray(
-            $discounts,
-            'discount'
-        );
+        return Braintree_Configuration::gateway()->discount()->all();
     }
 }
