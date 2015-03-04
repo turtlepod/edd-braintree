@@ -55,7 +55,7 @@ function edd_braintree_process_payment( $purchase_data ) {
 		$transaction = array(
 			'orderId'		=> $payment,
 			'amount' 		=> $purchase_data['price'],
-			'merchantAccountId'	=> trim( edd_get_option( 'braintree_merchantAccountId', '' ),
+			'merchantAccountId'	=> trim( edd_get_option( 'braintree_merchantAccountId', '' ) ),
 			'creditCard'	=> array(
 				'cardholderName'	=> $cc['card_name'],
 				'number'			=> $cc['card_number'],
