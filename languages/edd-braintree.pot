@@ -1,0 +1,147 @@
+# Copyright (C) 2015 Easy Digital Downloads - Braintree
+# This file is distributed under the same license as the Easy Digital Downloads - Braintree package.
+msgid ""
+msgstr ""
+"Project-Id-Version: Easy Digital Downloads - Braintree 1.1\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/support/plugin/edd-braintree\n"
+"POT-Creation-Date: 2015-03-14 08:25:09+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2015-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+
+#: edd-gateway-braintree.php:130 edd-gateway-braintree.php:135
+#: edd-gateway-braintree.php:137
+msgid "Transaction Failed (%s)"
+msgstr ""
+
+#: edd-gateway-braintree.php:141
+msgid "Transaction Declined: %s"
+msgstr ""
+
+#: edd-gateway-braintree.php:142
+msgid "Transaction Failed"
+msgstr ""
+
+#: edd-gateway-braintree.php:142
+msgid "Transaction status did not return complete. POST Data: %s"
+msgstr ""
+
+#: edd-gateway-braintree.php:157
+msgid "credit card number"
+msgstr ""
+
+#: edd-gateway-braintree.php:158
+msgid "expiration month"
+msgstr ""
+
+#: edd-gateway-braintree.php:159
+msgid "expiration year"
+msgstr ""
+
+#: edd-gateway-braintree.php:160
+msgid "card holder name"
+msgstr ""
+
+#: edd-gateway-braintree.php:161
+msgid "security code"
+msgstr ""
+
+#: edd-gateway-braintree.php:168
+msgid "You must enter a valid %s."
+msgstr ""
+
+#: edd-gateway-braintree.php:196
+msgid "Braintree Settings"
+msgstr ""
+
+#: edd-gateway-braintree.php:197
+msgid "Configure Braintree"
+msgstr ""
+
+#: edd-gateway-braintree.php:202
+msgid "Merchant ID"
+msgstr ""
+
+#: edd-gateway-braintree.php:203
+msgid ""
+"Enter your unique merchant ID (found on the portal under API Keys when you "
+"first login)."
+msgstr ""
+
+#: edd-gateway-braintree.php:209
+msgid "Merchant Account ID"
+msgstr ""
+
+#: edd-gateway-braintree.php:210
+msgid ""
+"Enter your unique merchant account ID (found under Account > Processing > "
+"Merchant Accounts)."
+msgstr ""
+
+#: edd-gateway-braintree.php:216
+msgid "Public Key"
+msgstr ""
+
+#: edd-gateway-braintree.php:217
+msgid ""
+"Enter your public key (found on the portal under API Keys when you first "
+"login)."
+msgstr ""
+
+#: edd-gateway-braintree.php:223
+msgid "Private Key"
+msgstr ""
+
+#: edd-gateway-braintree.php:224
+msgid ""
+"Enter your private key (found on the portal under API Keys when you first "
+"login)."
+msgstr ""
+
+#: edd-gateway-braintree.php:230
+msgid "Submit for Settlement"
+msgstr ""
+
+#: edd-gateway-braintree.php:231
+msgid ""
+"Enable this option if you would like to immediately submit all transactions "
+"for settlment."
+msgstr ""
+
+#: edd-gateway-braintree.php:236
+msgid "Store In Vault on Success"
+msgstr ""
+
+#: edd-gateway-braintree.php:237
+msgid ""
+"Enable this option if you would like to store the customers information in "
+"the vault on a successful purchase."
+msgstr ""
+
+#: edd-gateway-braintree.php:259
+msgid "Credit Card"
+msgstr ""
+
+#. Plugin Name of the plugin/theme
+msgid "Easy Digital Downloads - Braintree"
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "https://easydigitaldownloads.com/extensions/braintree-gateway/"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid ""
+"Accept credit card payments in EDD using your Braintree merchant account."
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "Pippin Williamson"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "https://easydigitaldownloads.com"
+msgstr ""
