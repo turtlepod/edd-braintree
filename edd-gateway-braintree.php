@@ -6,6 +6,8 @@ Description: Accept credit card payments in EDD using your Braintree merchant ac
 Author: Pippin Williamson
 Author URI: https://easydigitaldownloads.com
 Version: 1.1
+Text Domain: edd-braintree
+Domain Path: languages
 
 /*
 This program is free software; you can redistribute it and/or
@@ -23,32 +25,32 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-if( class_exists( 'EDD_License' ) && is_admin() ) {
+if ( class_exists( 'EDD_License' ) && is_admin() ) {
 	$edd_bt_license = new EDD_License( __FILE__, 'Braintree', '1.1', 'Pippin Williamson', 'braintree_license_key' );
 }
 
 function edd_braintree_process_payment( $purchase_data ) {
 
 	global $edd_options;
-	
+
 	require_once plugin_dir_path( __FILE__ ) . 'braintree/lib/Braintree.php';
 
 	// check the posted cc deails
 	$cc = edd_braintree_check_cc_details( $purchase_data );
 
 	// fcheck for errors before we continue to processing
-	if( ! edd_get_errors() ) {
+	if ( ! edd_get_errors() ) {
 		$purchase_summary = edd_get_purchase_summary( $purchase_data );
-		$payment = array( 
-			'price' 		=> $purchase_data['price'], 
-			'date' 			=> $purchase_data['date'], 
+		$payment = array(
+			'price' 		=> $purchase_data['price'],
+			'date' 			=> $purchase_data['date'],
 			'user_email' 	=> $purchase_data['user_email'],
 			'purchase_key' 	=> $purchase_data['purchase_key'],
 			'currency' 		=> edd_get_currency(),
 			'downloads' 	=> $purchase_data['downloads'],
 			'cart_details' 	=> $purchase_data['cart_details'],
 			'user_info' 	=> $purchase_data['user_info'],
-			'status' 		=> 'pending'
+			'status' 		=> 'pending',
 		);
 		$payment = edd_insert_payment( $payment );
 
@@ -61,12 +63,12 @@ function edd_braintree_process_payment( $purchase_data ) {
 				'number'			=> $cc['card_number'],
 				'expirationMonth'	=> $cc['card_exp_month'],
 				'expirationYear'	=> $cc['card_exp_year'],
-				'cvv'				=> $cc['card_cvc']
+				'cvv'				=> $cc['card_cvc'],
 			),
 			'customer' 		=> array(
 				'firstName' 		=> $purchase_data['user_info']['first_name'],
 				'lastName' 			=> $purchase_data['user_info']['last_name'],
-				'email' 			=> $purchase_data['user_email']
+				'email' 			=> $purchase_data['user_email'],
 			),
 			'billing' 		=> array(
 				'streetAddress'		=> $purchase_data['card_info']['card_address'],
@@ -74,37 +76,37 @@ function edd_braintree_process_payment( $purchase_data ) {
 				'locality' 			=> $purchase_data['card_info']['card_city'],
 				'region' 			=> $purchase_data['card_info']['card_state'],
 				'postalCode' 		=> $purchase_data['card_info']['card_zip'],
-				'countryCodeAlpha2'	=> $purchase_data['card_info']['card_country']
+				'countryCodeAlpha2'	=> $purchase_data['card_info']['card_country'],
 			),
 			'options'	=> array()
 		);
 
-		if( edd_get_option( 'braintree_submitForSettlement' ) ) {
+		if ( edd_get_option( 'braintree_submitForSettlement' ) ) {
 			$transaction['options']['submitForSettlement'] = true;
 		}
 
-		if( edd_get_option( 'braintree_storeInVaultOnSuccess' ) ) {
+		if ( edd_get_option( 'braintree_storeInVaultOnSuccess' ) ) {
 			$transaction['options']['storeInVaultOnSuccess'] = true;
 		}
 
-		if( edd_is_test_mode() ) {
-			Braintree_Configuration::environment('sandbox');
+		if ( edd_is_test_mode() ) {
+			Braintree_Configuration::environment( 'sandbox' );
 		} else {
-			Braintree_Configuration::environment('production');
+			Braintree_Configuration::environment( 'production' );
 		}
-			
+
 		Braintree_Configuration::merchantId( trim( edd_get_option( 'braintree_merchantId' ) ) );
 		Braintree_Configuration::publicKey( trim( edd_get_option( 'braintree_publicKey' ) ) );
 		Braintree_Configuration::privateKey( trim( edd_get_option( 'braintree_privateKey' ) ) );
 
 		$result = Braintree_Transaction::sale( $transaction );
 
-		if( $result->success ) {
-			
+		if ( $result->success ) {
+
 			// WINNING
-			if( edd_get_option( 'braintree_storeInVaultOnSuccess' ) && isset( $purchase_data['user_info']['id'] ) && $purchase_data['user_info']['id'] > 0 ) {
+			if ( edd_get_option( 'braintree_storeInVaultOnSuccess' ) && isset( $purchase_data['user_info']['id'] ) && $purchase_data['user_info']['id'] > 0 ) {
 				$tokens = get_user_meta( $purchase_data['user_info']['id'], 'edd_braintree_cc_tokens', true );
-				if( empty( $tokens ) ) {
+				if ( empty( $tokens ) ) {
 					$tokens = array();
 				}
 				$tokens[ $result->transaction->customerDetails->id ][ $result->transaction->creditCardDetails->token ] = $result->transaction->creditCardDetails->token;
@@ -113,31 +115,31 @@ function edd_braintree_process_payment( $purchase_data ) {
 
 			edd_empty_cart();
 			edd_update_payment_status( $payment, 'complete' );
-			if( function_exists( 'edd_set_payment_transaction_id' ) ) {
+			if ( function_exists( 'edd_set_payment_transaction_id' ) ) {
 				edd_set_payment_transaction_id( $payment, $result->transaction->_attributes['id'] );
 			}
 			edd_send_to_success_page();
-		
+
 		} else { // LOSING
 
-			switch( $result->transaction->status ) {
+			switch ( $result->transaction->status ) {
 				case 'processor_declined':
 					$reason = $result->transaction->processorResponseText . ' (' . $result->transaction->processorResponseCode . ')';
 				break;
 				case 'gateway_rejected':
-					$reason = sprintf( __( 'Transaction Failed (%s)', 'edd_braintree'), $result->transaction->gatewayRejectionReason );
+					$reason = sprintf( __( 'Transaction Failed (%s)', 'edd-braintree' ), $result->transaction->gatewayRejectionReason );
 				break;
 				default:
 					$reason = $result->errors->deepAll();
 					if( is_object( $reason ) ) {
-						$reason = sprintf( __( 'Transaction Failed (%s)', 'edd_braintree'), $reason->code . ' : ' . $reason->message );
+						$reason = sprintf( __( 'Transaction Failed (%s)', 'edd-braintree' ), $reason->code . ' : ' . $reason->message );
 					} else {
-						$reason = sprintf( __( 'Transaction Failed (%s)', 'edd_braintree'), $result->errors->deepAll() );
+						$reason = sprintf( __( 'Transaction Failed (%s)', 'edd-braintree' ), $result->errors->deepAll() );
 					}
 					break;
 			}
-			edd_set_error( 'braintree_decline' , sprintf( __( 'Transaction Declined: %s', 'edd_braintree' ), $reason ) );
-			edd_record_gateway_error( __( 'Transaction Failed', 'edd_braintree' ), sprintf( __( 'Transaction status did not return complete. POST Data: %s', 'edd_braintree' ), json_encode( $_GET ), $_GET['orderid'] ) );
+			edd_set_error( 'braintree_decline' , sprintf( __( 'Transaction Declined: %s', 'edd-braintree' ), $reason ) );
+			edd_record_gateway_error( __( 'Transaction Failed', 'edd-braintree' ), sprintf( __( 'Transaction status did not return complete. POST Data: %s', 'edd-braintree' ), json_encode( $_GET ), $_GET['orderid'] ) );
 			edd_send_back_to_checkout( '?payment-mode=braintree' );
 			$fail = true;
 		}
@@ -146,37 +148,37 @@ function edd_braintree_process_payment( $purchase_data ) {
 		edd_send_back_to_checkout( '?payment-mode=braintree' );
 		$fail = true;
 	}
-	
+
 }
 add_action( 'edd_gateway_braintree', 'edd_braintree_process_payment' );
 
 function edd_braintree_check_cc_details( $purchase_data ) {
 	$keys = array(
-		'card_number' => __( 'credit card number', 'edd_braintree' ),
-		'card_exp_month' => __( 'expiration month', 'edd_braintree' ),
-		'card_exp_year' => __( 'expiration year', 'edd_braintree' ),
-		'card_name' => __( 'card holder name', 'edd_braintree' ),
-		'card_cvc' => __( 'security code', 'edd_braintree' ),
+		'card_number' => __( 'credit card number', 'edd-braintree' ),
+		'card_exp_month' => __( 'expiration month', 'edd-braintree' ),
+		'card_exp_year' => __( 'expiration year', 'edd-braintree' ),
+		'card_name' => __( 'card holder name', 'edd-braintree' ),
+		'card_cvc' => __( 'security code', 'edd-braintree' ),
 	);
 
 	$cc_details = array();
 
-	foreach( $keys as $key => $desc ) {
-		if( !isset( $_POST[ $key ] ) || empty( $_POST[ $key ] ) ) {
-			edd_set_error( 'bad_' . $key , sprintf( __('You must enter a valid %s.', 'edd_braintree' ), $desc ) );
+	foreach ( $keys as $key => $desc ) {
+		if ( ! isset( $_POST[ $key ] ) || empty( $_POST[ $key ] ) ) {
+			edd_set_error( 'bad_' . $key , sprintf( __( 'You must enter a valid %s.', 'edd-braintree' ), $desc ) );
 		} else {
 			$data = esc_textarea( trim( $_POST[ $key ] ) );
 			switch( $key ) {
 				case 'card_exp_month':
-					$data = str_pad( $data, 2, 0, STR_PAD_LEFT);
+					$data = str_pad( $data, 2, 0, STR_PAD_LEFT );
 					break;
 				case 'card_exp_year':
-					if( strlen( $data ) > 2 ) 
-						$data = substr( $data, -2);
+					if( strlen( $data ) > 2 )
+						$data = substr( $data, -2 );
 					break;
 			}
 			$cc_details[ $key ] = $data;
-			
+
 		}
 	}
 	return $cc_details;
@@ -187,57 +189,57 @@ function edd_braintree_check_cc_details( $purchase_data ) {
  **/
 
 function edd_braintree_add_settings( $settings ) {
- 
+
 	$gateway_settings = array(
 		array(
 			'id' => 'braintree_settings',
-			'name' => '<strong>' . __( 'Braintree Settings', 'edd_braintree' ) . '</strong>',
-			'desc' => __( 'Configure Braintree', 'edd_braintree' ),
-			'type' => 'header'
+			'name' => '<strong>' . __( 'Braintree Settings', 'edd-braintree' ) . '</strong>',
+			'desc' => __( 'Configure Braintree', 'edd-braintree' ),
+			'type' => 'header',
 		),
 		array(
 			'id' => 'braintree_merchantId',
-			'name' => __( 'Merchant ID', 'edd_braintree' ),
-			'desc' => __( 'Enter your unique merchant ID (found on the portal under API Keys when you first login).', 'edd_braintree' ),
+			'name' => __( 'Merchant ID', 'edd-braintree' ),
+			'desc' => __( 'Enter your unique merchant ID (found on the portal under API Keys when you first login).', 'edd-braintree' ),
 			'type' => 'text',
-			'size' => 'regular'
+			'size' => 'regular',
 		),
 		array(
 			'id' => 'braintree_merchantAccountId',
-			'name' => __( 'Merchant Account ID', 'edd_braintree' ),
-			'desc' => __( 'Enter your unique merchant account ID (found under Account > Processing > Merchant Accounts).', 'edd_braintree' ),
+			'name' => __( 'Merchant Account ID', 'edd-braintree' ),
+			'desc' => __( 'Enter your unique merchant account ID (found under Account > Processing > Merchant Accounts).', 'edd-braintree' ),
 			'type' => 'text',
-			'size' => 'regular'
+			'size' => 'regular',
 		),
 		array(
 			'id' => 'braintree_publicKey',
-			'name' => __( 'Public Key', 'edd_braintree' ),
-			'desc' => __( 'Enter your public key (found on the portal under API Keys when you first login).', 'edd_braintree' ),
+			'name' => __( 'Public Key', 'edd-braintree' ),
+			'desc' => __( 'Enter your public key (found on the portal under API Keys when you first login).', 'edd-braintree' ),
 			'type' => 'text',
-			'size' => 'regular'
+			'size' => 'regular',
 		),
 		array(
 			'id' => 'braintree_privateKey',
-			'name' => __( 'Private Key', 'edd_braintree' ),
-			'desc' => __( 'Enter your private key (found on the portal under API Keys when you first login).', 'edd_braintree' ),
+			'name' => __( 'Private Key', 'edd-braintree' ),
+			'desc' => __( 'Enter your private key (found on the portal under API Keys when you first login).', 'edd-braintree' ),
 			'type' => 'password',
-			'size' => 'regular'
+			'size' => 'regular',
 		),
 		array(
 			'id' => 'braintree_submitForSettlement',
-			'name' => __( 'Submit for Settlement', 'edd_braintree' ),
-			'desc' => __( 'Enable this option if you would like to immediately submit all transactions for settlment.', 'edd_braintree' ),
-			'type' => 'checkbox'
+			'name' => __( 'Submit for Settlement', 'edd-braintree' ),
+			'desc' => __( 'Enable this option if you would like to immediately submit all transactions for settlment.', 'edd-braintree' ),
+			'type' => 'checkbox',
 		),
 		array(
 			'id' => 'braintree_storeInVaultOnSuccess',
-			'name' => __( 'Store In Vault on Success', 'edd_braintree' ),
-			'desc' => __( 'Enable this option if you would like to store the customers information in the vault on a successful purchase.', 'edd_braintree' ),
-			'type' => 'checkbox'
+			'name' => __( 'Store In Vault on Success', 'edd-braintree' ),
+			'desc' => __( 'Enable this option if you would like to store the customers information in the vault on a successful purchase.', 'edd-braintree' ),
+			'type' => 'checkbox',
 		),
 	);
 
-	return array_merge( $settings, $gateway_settings );	
+	return array_merge( $settings, $gateway_settings );
 }
 add_filter( 'edd_settings_gateways', 'edd_braintree_add_settings' );
 
@@ -247,14 +249,14 @@ function edd_braintree_textdomain() {
 	$edd_lang_dir = apply_filters( 'edd_braintree_languages_directory', $edd_lang_dir );
 
 	// Load the translations
-	load_plugin_textdomain( 'edd_braintree', false, $edd_lang_dir );
+	load_plugin_textdomain( 'edd-braintree', false, $edd_lang_dir );
 }
-add_action('init', 'edd_braintree_textdomain');
+add_action( 'init', 'edd_braintree_textdomain' );
 
 function edd_braintree_register_gateway( $gateways ) {
 	$gateways['braintree'] = array(
 		'admin_label' => 'Braintree',
-		'checkout_label' => __( 'Credit Card', 'edd_braintree' )
+		'checkout_label' => __( 'Credit Card', 'edd-braintree' )
 	);
 	return $gateways;
 }
@@ -270,13 +272,13 @@ add_filter( 'edd_payment_gateways', 'edd_braintree_register_gateway' );
  */
 function edd_braintree_link_transaction_id( $transaction_id, $payment_id ) {
 
-	if( $transaction_id == $payment_id ) {
+	if ( $transaction_id == $payment_id ) {
 		return $transaction_id;
 	}
 
 	$base = 'https://';
 
-	if( 'test' == get_post_meta( $payment_id, '_edd_payment_mode', true ) ) {
+	if ( 'test' == get_post_meta( $payment_id, '_edd_payment_mode', true ) ) {
 		$base .= 'sandbox.';
 	}
 
