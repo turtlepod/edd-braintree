@@ -101,7 +101,7 @@ function edd_braintree_process_payment( $purchase_data ) {
 
 		$result = Braintree_Transaction::sale( $transaction );
 
-		if ( $result->success ) {
+		if ( ! empty( $result->success ) ) {
 
 			// WINNING
 			if ( edd_get_option( 'braintree_storeInVaultOnSuccess' ) && isset( $purchase_data['user_info']['id'] ) && $purchase_data['user_info']['id'] > 0 ) {
@@ -120,7 +120,18 @@ function edd_braintree_process_payment( $purchase_data ) {
 			}
 			edd_send_to_success_page();
 
-		} else { // LOSING
+		} else {
+
+			// LOSING
+
+			if( empty( $result->transaction->status ) || empty( $result->transaction ) ) {
+
+				$error = new Braintree_Error_Validation( $result );
+				
+				edd_set_error( 'braintree_decline' , sprintf( __( 'Transaction Failed: %s', 'edd-braintree' ), $error->__attributes['message'] ) );
+				edd_send_back_to_checkout( '?payment-mode=braintree' );
+
+			}
 
 			switch ( $result->transaction->status ) {
 				case 'processor_declined':
@@ -131,6 +142,9 @@ function edd_braintree_process_payment( $purchase_data ) {
 				break;
 				default:
 					$reason = $result->errors->deepAll();
+
+					echo '<pre>'; print_r( $reason ); echo '</pre>'; exit;
+
 					if( is_object( $reason ) ) {
 						$reason = sprintf( __( 'Transaction Failed (%s)', 'edd-braintree' ), $reason->code . ' : ' . $reason->message );
 					} else {
@@ -138,15 +152,13 @@ function edd_braintree_process_payment( $purchase_data ) {
 					}
 					break;
 			}
+
 			edd_set_error( 'braintree_decline' , sprintf( __( 'Transaction Declined: %s', 'edd-braintree' ), $reason ) );
-			edd_record_gateway_error( __( 'Transaction Failed', 'edd-braintree' ), sprintf( __( 'Transaction status did not return complete. POST Data: %s', 'edd-braintree' ), json_encode( $_GET ), $_GET['orderid'] ) );
 			edd_send_back_to_checkout( '?payment-mode=braintree' );
-			$fail = true;
 		}
 
 	} else {
 		edd_send_back_to_checkout( '?payment-mode=braintree' );
-		$fail = true;
 	}
 
 }
