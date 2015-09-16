@@ -127,7 +127,7 @@ function edd_braintree_process_payment( $purchase_data ) {
 			if( empty( $result->transaction->status ) || empty( $result->transaction ) ) {
 
 				$error = new Braintree_Error_Validation( $result );
-				
+
 				edd_set_error( 'braintree_decline' , sprintf( __( 'Transaction Failed: %s', 'edd-braintree' ), $error->__attributes['message'] ) );
 				edd_send_back_to_checkout( '?payment-mode=braintree' );
 
@@ -142,9 +142,6 @@ function edd_braintree_process_payment( $purchase_data ) {
 				break;
 				default:
 					$reason = $result->errors->deepAll();
-
-					echo '<pre>'; print_r( $reason ); echo '</pre>'; exit;
-
 					if( is_object( $reason ) ) {
 						$reason = sprintf( __( 'Transaction Failed (%s)', 'edd-braintree' ), $reason->code . ' : ' . $reason->message );
 					} else {
