@@ -5,7 +5,7 @@ Plugin URI: https://easydigitaldownloads.com/extensions/braintree-gateway/
 Description: Accept credit card payments in EDD using your Braintree merchant account.
 Author: Pippin Williamson
 Author URI: https://easydigitaldownloads.com
-Version: 1.1.1
+Version: 1.1.2
 Text Domain: edd-braintree
 Domain Path: languages
 
@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 if ( class_exists( 'EDD_License' ) && is_admin() ) {
-	$edd_bt_license = new EDD_License( __FILE__, 'Braintree', '1.1.1', 'Pippin Williamson', 'braintree_license_key' );
+	$edd_bt_license = new EDD_License( __FILE__, 'Braintree', '1.1.2', 'Pippin Williamson', 'braintree_license_key' );
 }
 
 function edd_braintree_process_payment( $purchase_data ) {
