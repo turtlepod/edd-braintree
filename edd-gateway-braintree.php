@@ -57,7 +57,7 @@ function edd_braintree_process_payment( $purchase_data ) {
 		$transaction = array(
 			'orderId'		=> $payment,
 			'amount' 		=> $purchase_data['price'],
-			'merchantAccountId'	=> trim( edd_get_option( 'braintree_merchantAccountId', '' ) ),
+			'merchantAccountId'	=> trim( edd_get_option( 'braintree_merchant_account_id', '' ) ),
 			'creditCard'	=> array(
 				'cardholderName'	=> $cc['card_name'],
 				'number'			=> $cc['card_number'],
@@ -81,11 +81,11 @@ function edd_braintree_process_payment( $purchase_data ) {
 			'options'	=> array()
 		);
 
-		if ( edd_get_option( 'braintree_submitForSettlement' ) ) {
+		if ( edd_get_option( 'braintree_submit_for_settlement' ) ) {
 			$transaction['options']['submitForSettlement'] = true;
 		}
 
-		if ( edd_get_option( 'braintree_storeInVaultOnSuccess' ) ) {
+		if ( edd_get_option( 'braintree_store_in_vault_on_success' ) ) {
 			$transaction['options']['storeInVaultOnSuccess'] = true;
 		}
 
@@ -95,16 +95,16 @@ function edd_braintree_process_payment( $purchase_data ) {
 			Braintree_Configuration::environment( 'production' );
 		}
 
-		Braintree_Configuration::merchantId( trim( edd_get_option( 'braintree_merchantId' ) ) );
-		Braintree_Configuration::publicKey( trim( edd_get_option( 'braintree_publicKey' ) ) );
-		Braintree_Configuration::privateKey( trim( edd_get_option( 'braintree_privateKey' ) ) );
+		Braintree_Configuration::merchantId( trim( edd_get_option( 'braintree_merchant_id' ) ) );
+		Braintree_Configuration::publicKey( trim( edd_get_option( 'braintree_public_key' ) ) );
+		Braintree_Configuration::privateKey( trim( edd_get_option( 'braintree_private_key' ) ) );
 
 		$result = Braintree_Transaction::sale( $transaction );
 
 		if ( ! empty( $result->success ) ) {
 
 			// WINNING
-			if ( edd_get_option( 'braintree_storeInVaultOnSuccess' ) && isset( $purchase_data['user_info']['id'] ) && $purchase_data['user_info']['id'] > 0 ) {
+			if ( edd_get_option( 'braintree_store_in_vault_on_success' ) && isset( $purchase_data['user_info']['id'] ) && $purchase_data['user_info']['id'] > 0 ) {
 				$tokens = get_user_meta( $purchase_data['user_info']['id'], 'edd_braintree_cc_tokens', true );
 				if ( empty( $tokens ) ) {
 					$tokens = array();
@@ -207,46 +207,50 @@ function edd_braintree_add_settings( $settings ) {
 			'type' => 'header',
 		),
 		array(
-			'id' => 'braintree_merchantId',
+			'id' => 'braintree_merchant_id',
 			'name' => __( 'Merchant ID', 'edd-braintree' ),
 			'desc' => __( 'Enter your unique merchant ID (found on the portal under API Keys when you first login).', 'edd-braintree' ),
 			'type' => 'text',
 			'size' => 'regular',
 		),
 		array(
-			'id' => 'braintree_merchantAccountId',
+			'id' => 'braintree_merchant_account_id',
 			'name' => __( 'Merchant Account ID', 'edd-braintree' ),
 			'desc' => __( 'Enter your unique merchant account ID (found under Account > Processing > Merchant Accounts).', 'edd-braintree' ),
 			'type' => 'text',
 			'size' => 'regular',
 		),
 		array(
-			'id' => 'braintree_publicKey',
+			'id' => 'braintree_public_key',
 			'name' => __( 'Public Key', 'edd-braintree' ),
 			'desc' => __( 'Enter your public key (found on the portal under API Keys when you first login).', 'edd-braintree' ),
 			'type' => 'text',
 			'size' => 'regular',
 		),
 		array(
-			'id' => 'braintree_privateKey',
+			'id' => 'braintree_private_key',
 			'name' => __( 'Private Key', 'edd-braintree' ),
 			'desc' => __( 'Enter your private key (found on the portal under API Keys when you first login).', 'edd-braintree' ),
 			'type' => 'password',
 			'size' => 'regular',
 		),
 		array(
-			'id' => 'braintree_submitForSettlement',
+			'id' => 'braintree_submit_for_settlement',
 			'name' => __( 'Submit for Settlement', 'edd-braintree' ),
 			'desc' => __( 'Enable this option if you would like to immediately submit all transactions for settlment.', 'edd-braintree' ),
 			'type' => 'checkbox',
 		),
 		array(
-			'id' => 'braintree_storeInVaultOnSuccess',
+			'id' => 'braintree_store_in_vault_on_success',
 			'name' => __( 'Store In Vault on Success', 'edd-braintree' ),
 			'desc' => __( 'Enable this option if you would like to store the customers information in the vault on a successful purchase.', 'edd-braintree' ),
 			'type' => 'checkbox',
 		),
 	);
+
+	if ( version_compare( EDD_VERSION, 2.5, '>=' ) ) {
+		$gateway_settings = array( 'braintree' => $gateway_settings );
+	}
 
 	return array_merge( $settings, $gateway_settings );
 }
@@ -291,10 +295,52 @@ function edd_braintree_link_transaction_id( $transaction_id, $payment_id ) {
 		$base .= 'sandbox.';
 	}
 
-	$base .= 'braintreegateway.com/merchants/' . edd_get_option( 'braintree_merchantId' ) . '/transactions/';
+	$base .= 'braintreegateway.com/merchants/' . edd_get_option( 'braintree_merchant_id' ) . '/transactions/';
 	$transaction_url = '<a href="' . esc_url( $base . $transaction_id ) . '" target="_blank">' . $transaction_id . '</a>';
 
 	return apply_filters( 'edd_braintree_link_payment_details_transaction_id', $transaction_url );
 
 }
 add_filter( 'edd_payment_details_transaction_id-braintree', 'edd_braintree_link_transaction_id', 10, 2 );
+
+/**
+ * Adds the settings section in the Gateways tab in EDD 2.5+
+ */
+function edd_braintree_add_settings_section( $sections ) {
+	$sections['braintree'] = __( 'Braintree', 'edd-braintree' );
+	return $sections;
+}
+add_filter( 'edd_settings_sections_gateways', 'edd_braintree_add_settings_section' );
+
+/**
+ * Migrates old settings values to the new keys
+ */
+function edd_braintree_migrate_settings_ids() {
+
+	if ( edd_get_option( 'edd_braintree_ids_migrated', false ) ) {
+		return;
+	}
+
+	$ids = array(
+		'braintree_merchantId'            => 'braintree_merchant_id',
+		'braintree_merchantAccountId'     => 'braintree_merchant_account_id',
+		'braintree_publicKey'             => 'braintree_public_key',
+		'braintree_privateKey'            => 'braintree_private_key',
+		'braintree_submitForSettlement'   => 'braintree_submit_for_settlement',
+		'braintree_storeInVaultOnSuccess' => 'braintree_store_in_vault_on_success'
+	);
+
+	foreach ( $ids as $old_key => $new_key ) {
+
+		$old_value = edd_get_option( $old_key, false );
+
+		if ( ! empty( $old_value ) ) {
+			if ( edd_update_option( $new_key, $old_value ) ) {
+				edd_delete_option( $old_key );
+			}
+		}
+	}
+
+	edd_update_option( 'edd_braintree_ids_migrated', true );
+}
+add_action( 'admin_init', 'edd_braintree_migrate_settings_ids' );
