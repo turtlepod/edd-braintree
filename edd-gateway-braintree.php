@@ -387,7 +387,7 @@ function edd_braintree_required_items_exist(){
  */
 function edd_braintree_edd_notice() { ?>
 	<div class="updated">
-		<p><?php printf( __( '<strong>Notice:</strong> Easy Digital Downloads Braintree requires Easy Digital Downloads 2.5 or higher in order to function properly.', 'edd_fes' ) ); ?></p>
+		<p><?php printf( __( '<strong>Notice:</strong> Easy Digital Downloads Braintree requires Easy Digital Downloads 2.5 or higher in order to function properly.', 'edd-braintree' ) ); ?></p>
 	</div>
 	<?php
 }
@@ -405,7 +405,7 @@ function edd_braintree_edd_notice() { ?>
  */
 function edd_braintree_wp_notice() { ?>
 	<div class="updated">
-		<p><?php printf( __( '<strong>Notice:</strong> Easy Digital Downloads Braintree requires WordPress 4.2 or higher in order to function properly.', 'edd_fes' ) ); ?></p>
+		<p><?php printf( __( '<strong>Notice:</strong> Easy Digital Downloads Braintree requires WordPress 4.2 or higher in order to function properly.', 'edd-braintree' ) ); ?></p>
 	</div>
 	<?php
 }
