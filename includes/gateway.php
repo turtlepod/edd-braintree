@@ -143,7 +143,7 @@ function edd_braintree_process_payment( $purchase_data ) {
 		/* Submit transaction to Braintree
 		------------------------------------------ */
 		$result = Braintree_Transaction::sale( $transaction );
-		update_option( 'batman', $result );
+		//update_option( 'batman', $result );
 
 		/* === TRANSACTION SUCCESS ! === */
 		if ( ! empty( $result->success ) ) {
